@@ -2,7 +2,7 @@
 (eval-when-compile
   (require 'umr))
 (mapc #'require
-      [fac hooker primary-pane miscellaneous])
+      [fac hook-up primary-pane miscellaneous])
 
 
 (defun statusbar--buffer-line-count ()
@@ -13,7 +13,7 @@
 (defun statusbar--set-buffer-line-count (&rest _) ; `after-change-functions' passes args.
   (setq statusbar--buffer-line-count (statusbar--buffer-line-count)))
 
-(hooker-hook-up
+(hook-up
  [
   buffer-list-update-hook
   after-change-functions
@@ -102,7 +102,7 @@
                (setq statusbar--file-vc-status state)
                state)))
 
-  (hooker-hook-up
+  (hook-up
    [
     after-save-hook
     find-file-hook
