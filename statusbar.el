@@ -5,21 +5,6 @@
       [fac hook-up primary-pane miscellaneous])
 
 
-(defun statusbar--buffer-line-count ()
-  "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
-  (count-lines (point-min) (point-max)))
-(defvar-local statusbar--buffer-line-count (statusbar--buffer-line-count))
-
-(defun statusbar--set-buffer-line-count (&rest _) ; `after-change-functions' passes args.
-  (setq statusbar--buffer-line-count (statusbar--buffer-line-count)))
-
-(hook-up
- [
-  buffer-list-update-hook
-  after-change-functions
-  ]
- [statusbar--set-buffer-line-count])
-
 ;;; Faces
 
 (fac-def-adaptive-faces 'statusbar
@@ -44,6 +29,20 @@
   )
 
 ;;; Buffer info
+
+(defvar-local statusbar--buffer-line-count nil)
+(defun statusbar--buffer-line-count (&rest _) ; `after-change-functions' passes args.
+  "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
+  (setq statusbar--buffer-line-count
+        (count-lines (point-min) (point-max)))
+  statusbar--buffer-line-count)
+
+(hook-up
+ [
+  buffer-list-update-hook
+  after-change-functions
+  ]
+ [statusbar--buffer-line-count])
 
 (defun statusbar--buffer-file-like-p ()
   "Is the buffer visiting something that should be a file?"
@@ -97,10 +96,8 @@
   (defun statusbar--file-vc-status ()
     "Get and set the version-control status of the file visited by the current buffer."
     (umr-let f (statusbar--buffer-file-path)
-             state (and f (vc-state f))
-             (when state
-               (setq statusbar--file-vc-status state)
-               state)))
+        (progn (setq statusbar--file-vc-status (and f (vc-state f)))
+               statusbar--file-vc-status)))
 
   (hook-up
    [
