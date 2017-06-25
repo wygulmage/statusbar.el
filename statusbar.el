@@ -92,15 +92,15 @@
                  'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
 
 
-(defvar-local statusbar--file-vc-status nil
+  (defvar-local statusbar--file-vc-status nil
     "The version-control status of the current file.")
   (defun statusbar--file-vc-status ()
-    "The version-control status of FILE or the file visited by the current buffer."
-    (let ((f (statusbar--buffer-file-path)))
-      (and f (vc-state f))))
-  (defun statusbar--set-file-vc-status (&rest _)
-    "Set the buffer-local variable `statusbar--file-vc-status' to the version-control status of the file visited by the current buffer."
-    (setf statusbar--file-vc-status (statusbar--file-vc-status)))
+    "Get and set the version-control status of the file visited by the current buffer."
+    (umr-let f (statusbar--buffer-file-path)
+             state (and f (vc-state f))
+             (when state
+               (setq statusbar--file-vc-status state)
+               state)))
 
   (hooker-hook-up
    [
@@ -108,7 +108,7 @@
     find-file-hook
     first-change-hook
     ]
-   [statusbar--set-file-vc-status])
+   [statusbar--file-vc-status])
 
   (defun statusbar-file-vc-status-string ()
     "A string that represents the VC status of the file visited by the current buffer."
@@ -122,7 +122,7 @@
       (`removed "- ")
       (`conflict "! ")
       (`missing "? ")
-      (_ nil)))
+      (_ nil))) ; Let me know if I'm missing a state.
 
   (defun statusbar-vc-branch-string ()
     (if (not vc-mode)
