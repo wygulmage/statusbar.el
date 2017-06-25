@@ -5,14 +5,13 @@
       [fac hooker primary-pane miscellaneous])
 
 
-
-(defun statusbar-buffer-line-count ()
+(defun statusbar--buffer-line-count ()
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
   (count-lines (point-min) (point-max)))
-(defvar-local statusbar-buffer-line-count (statusbar-buffer-line-count))
+(defvar-local statusbar--buffer-line-count (statusbar--buffer-line-count))
 
 (defun statusbar--set-buffer-line-count (&rest _) ; `after-change-functions' passes args.
-  (setq statusbar-buffer-line-count (statusbar-buffer-line-count)))
+  (setq statusbar--buffer-line-count (statusbar--buffer-line-count)))
 
 (hooker-hook-up
  [
@@ -125,7 +124,6 @@
       (`missing "? ")
       (_ nil)))
 
-
   (defun statusbar-vc-branch-string ()
     (if (not vc-mode)
         ""
@@ -143,7 +141,7 @@
   (defun statusbar-line-position-string ()
     "Current line / total lines. Click to toggle line numbers."
     (umr-let
-     lines (number-to-string statusbar-buffer-line-count)
+     lines (number-to-string statusbar--buffer-line-count)
      (propertize
       (concat
        (misc--pad (length lines) (format-mode-line "%l"))
