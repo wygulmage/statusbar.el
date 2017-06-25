@@ -36,12 +36,12 @@
     (:weight bold
              :underline t
              :inherit statusbar-default-inactive-face)
-    fac-intensify-face-foreground)
+    fac-intensify-foreground)
   '(shadow
     "a dimmed face for the mode-line"
     (:inherit statusbar-default-active-face)
     (:inherit statusbar-default-inactive-face)
-    fac-fade-face-foreground)
+    fac-fade-foreground)
   )
 
 ;;; Buffer info
