@@ -132,8 +132,8 @@
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
       'mouse-face (statusbar-default-face)
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
-     (propertize ")" 'face (statusbar-shadow-face))
-     )))
+     (propertize ")" 'face (statusbar-shadow-face)))))
+
 
 (defun statusbar-line-position-string ()
   "Current line / total lines. Click to toggle line numbers."
@@ -150,6 +150,10 @@
     'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
 
   ;;; TODO: Create shortened mode-line faces for a collapsed but visible mode line.
+
+;;; Statusbar layouts
+(defun statusbar-hide ()
+  (setq mode-line-format ()))
 
 (defvar statusbar-base-layout
   '(:eval
