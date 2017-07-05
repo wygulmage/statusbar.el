@@ -1,6 +1,4 @@
 ;;; statusbar.el --- simple clean statusbar -*- lexical-binding: t -*-
-(eval-when-compile
-  (require 'umr))
 (mapc #'require
       [fac hook-up primary-pane miscellaneous])
 
@@ -25,8 +23,7 @@
     "a dimmed face for the mode-line"
     (:inherit statusbar-default-active-face)
     (:inherit statusbar-default-inactive-face)
-    fac-fade-foreground)
-  )
+    fac-fade-foreground))
 
 ;;; Buffer info
 
@@ -38,10 +35,8 @@
   statusbar--buffer-line-count)
 
 (hook-up
- [
-  buffer-list-update-hook
-  after-change-functions
-  ]
+ [buffer-list-update-hook
+  after-change-functions]
  [statusbar--buffer-line-count])
 
 (defun statusbar--buffer-file-like-p ()
@@ -56,25 +51,26 @@
 (defun statusbar-buffer-name ()
   "The name of the buffer. If it's a file, show the directory on hover and open dired with a click."
   (if buffer-file-truename
-      (propertize (buffer-name)
-                  'help-echo (abbreviate-file-name buffer-file-truename)
-                  'local-map (make-mode-line-mouse-map
-                              'mouse-1 (lambda () (interactive)
-                                         (dired (file-name-directory buffer-file-truename)))))
+      (propertize
+       (buffer-name)
+       'help-echo (abbreviate-file-name buffer-file-truename)
+       'local-map (make-mode-line-mouse-map
+                   'mouse-1 (lambda () (interactive)
+                              (dired (file-name-directory buffer-file-truename)))))
     (buffer-name)))
 
 (defun statusbar-primary-file-or-buffer-name ()
   "The name of the file or buffer in the primary pane."
-  (umr-let
-   b (window-buffer primary-pane)
-   (or (statusbar--buffer-file-path b)
-       (buffer-name b))))
+  (let ((b (window-buffer primary-pane)))
+    (or (statusbar--buffer-file-path b)
+        (buffer-name b))))
 
 (defun statusbar-major-mode-name ()
   "The buffer's major-mode"
-  (propertize mode-name
-              'help-echo "Click mouse 1 for mode menu, mouse 2 for mode info, or mouse 3 to toggle minor modes."
-              'local-map mode-line-major-mode-keymap))
+  (propertize
+   mode-name
+   'help-echo "Click mouse 1 for mode menu, mouse 2 for mode info, or mouse 3 to toggle minor modes."
+   'local-map mode-line-major-mode-keymap))
 
 (defun statusbar-buffer-write-status-string ()
   "Show whether a file-like buffer has been modified since its last save; click to save."
@@ -95,9 +91,9 @@
   "The version-control status of the current file.")
 (defun statusbar--file-vc-status ()
   "Get and set the version-control status of the file visited by the current buffer."
-  (umr-let f (statusbar--buffer-file-path)
-           (progn (setq statusbar--file-vc-status (and f (vc-state f)))
-                  statusbar--file-vc-status)))
+  (let ((f (statusbar--buffer-file-path)))
+    (setq statusbar--file-vc-status (and f (vc-state f)))
+    statusbar--file-vc-status))
 
 (hook-up
  [
@@ -137,17 +133,16 @@
 
 (defun statusbar-line-position-string ()
   "Current line / total lines. Click to toggle line numbers."
-  (umr-let
-   lines (number-to-string statusbar--buffer-line-count)
-   (propertize
-    (concat
-     (misc--pad (length lines) (format-mode-line "%l"))
-     (propertize "/" 'face (statusbar-shadow-face))
-     lines)
-    'help-echo (if (bound-and-true-p linum-mode)
-                   "Hide line numbers."
-                 "Show line numbers.")
-    'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
+  (let ((lines (number-to-string statusbar--buffer-line-count)))
+    (propertize
+     (concat
+      (misc--pad (length lines) (format-mode-line "%l"))
+      (propertize "/" 'face (statusbar-shadow-face))
+      lines)
+     'help-echo (if (bound-and-true-p linum-mode)
+                    "Hide line numbers."
+                  "Show line numbers.")
+     'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
 
   ;;; TODO: Create shortened mode-line faces for a collapsed but visible mode line.
 
