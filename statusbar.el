@@ -153,6 +153,9 @@
 (defvar statusbar-base-layout
   '(:eval
     (concat
+     (when (fboundp 'winum-get-number-string)
+       (winum-get-number-string))
+     " "
      (statusbar-buffer-write-status-string)
      " "
      (statusbar-buffer-name)
