@@ -15,15 +15,15 @@
     "an emphasized face for the mode-line"
     (:weight bold
              :underline t
-             :inherit statusbar-default-active-face)
+             :inherit statusbar-default-active)
     (:weight bold
              :underline t
-             :inherit statusbar-default-inactive-face)
+             :inherit statusbar-default-inactive)
     fac-intensify-foreground)
   '(shadow
     "a dimmed face for the mode-line"
-    (:inherit statusbar-default-active-face)
-    (:inherit statusbar-default-inactive-face)
+    (:inherit statusbar-default-active)
+    (:inherit statusbar-default-inactive)
     fac-fade-foreground))
 
 ;;; Buffer info
@@ -122,14 +122,14 @@
   (if (not vc-mode)
       ""
     (concat
-     (propertize "(" 'face (statusbar-shadow-face))
+     (propertize "(" 'face (statusbar-shadow))
      (propertize
       (concat
        (statusbar-file-vc-status-string)
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
-      'mouse-face (statusbar-default-face)
+      'mouse-face (statusbar-default)
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
-     (propertize ")" 'face (statusbar-shadow-face)))))
+     (propertize ")" 'face (statusbar-shadow)))))
 
 
 (defun statusbar-line-position-string ()
@@ -138,12 +138,29 @@
     (propertize
      (concat
       (misc--pad (length lines) (format-mode-line "%l"))
-      (propertize "/" 'face (statusbar-shadow-face))
+      (propertize "/" 'face (statusbar-shadow))
       lines)
      'help-echo (if (bound-and-true-p linum-mode)
                     "Hide line numbers."
                   "Show line numbers.")
      'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
+
+(if (fboundp 'winum-get-number-string)
+    (defun statusbar-window-number-string ()
+      "The window's number if we can get it."
+      (when (cdr (window-list nil 0))
+        (concat
+         (propertize "[" 'face (statusbar-shadow))
+         (winum-get-number-string)
+         (propertize "]" 'face (statusbar-shadow)))))
+  (defun statusbar-window-number-string () "Empty string" ""))
+
+(defun concat-when-first (&rest STRINGS)
+  (when STRINGS
+    (if (or (null (car STRINGS))
+            (string= "" (car STRINGS)))
+        ""
+      (apply #'concat STRINGS))))
 
   ;;; TODO: Create shortened mode-line faces for a collapsed but visible mode line.
 
@@ -154,8 +171,9 @@
 (defvar statusbar-base-layout
   '(:eval
     (concat
-     (statusbar-buffer-write-status-string)
+     (statusbar-window-number-string)
      " "
+     (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
      " "
      (statusbar-vc-branch-string)
