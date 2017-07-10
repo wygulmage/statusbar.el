@@ -2,6 +2,7 @@
 (mapc #'require
       [fac hook-up primary-pane miscellaneous])
 
+(setq-default statusbar-layout mode-line-format)
 
 ;;; Faces
 
@@ -164,7 +165,8 @@
   "a simple status bar")
 
 (defun statusbar-use-base-layout ()
-  (setq mode-line-format statusbar-base-layout))
+  (setq mode-line-format statusbar-base-layout
+        statusbar-layout statusbar-base-layout))
 
 (defvar statusbar-prog-mode-layout
   (list
@@ -179,7 +181,14 @@
   "simple status bar that indicates the current mode")
 
 (defun statusbar-use-prog-mode-layout ()
-  (setq mode-line-format statusbar-prog-mode-layout))
+  (setq mode-line-format statusbar-prog-mode-layout
+        statusbar-layout statusbar-prog-mode-layout))
+
+(defun statusbar-use-echo-area ()
+  "Use the echo area instead of the mode line. This disables all key maps, of course, since the echo area doesn't have a key map."
+  (let ((message-log-max nil))
+    (setq mode-line-format nil)
+    (message "%s" (format-mode-line statusbar-layout))))
 
 (defun statusbar-set-frame-title ()
   (when (display-graphic-p)
