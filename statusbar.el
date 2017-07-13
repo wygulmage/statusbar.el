@@ -88,33 +88,33 @@
                   'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
 
 
-(defvar-local statusbar--file-vc-status nil
-  "The version-control status of the current file.")
-(defun statusbar--file-vc-status ()
-  "Get and set the version-control status of the file visited by the current buffer."
-  (let ((f (statusbar--buffer-file-path)))
-    (setq statusbar--file-vc-status (and f (vc-state f)))
-    statusbar--file-vc-status))
+;; (defvar-local statusbar--file-vc-status nil
+;;   "The version-control status of the current file.")
+;; (defun statusbar--file-vc-status ()
+;;   "Get and set the version-control status of the file visited by the current buffer."
+;;   (let ((f (statusbar--buffer-file-path)))
+;;     (setq statusbar--file-vc-status (and f (vc-state f)))
+;;     statusbar--file-vc-status))
 
-(hook-up
- [after-save-hook
-  find-file-hook
-  first-change-hook]
- [statusbar--file-vc-status])
+;; (hook-up
+;;  [after-save-hook
+;;   find-file-hook
+;;   first-change-hook]
+;;  [statusbar--file-vc-status])
 
-(defun statusbar-file-vc-status-string ()
-  "A string that represents the VC status of the file visited by the current buffer."
-  (pcase statusbar--file-vc-status
-    (`up-to-date "")
-    (`ignored "")
-    (`edited "◆ ")
-    (`needs-update "U ")
-    (`needs-merge "M ")
-    (`added "+ ")
-    (`removed "- ")
-    (`conflict "! ")
-    (`missing "? ")
-    (_ nil))) ; Let me know if I'm missing a state.
+;; (defun statusbar-file-vc-status-string ()
+;;   "A string that represents the VC status of the file visited by the current buffer."
+;;   (pcase statusbar--file-vc-status
+;;     (`up-to-date "")
+;;     (`ignored "")
+;;     (`edited "◆ ")
+;;     (`needs-update "U ")
+;;     (`needs-merge "M ")
+;;     (`added "+ ")
+;;     (`removed "- ")
+;;     (`conflict "! ")
+;;     (`missing "? ")
+;;     (_ nil))) ; Let me know if I'm missing a state.
 
 (defun statusbar-vc-branch-string ()
   (if (not vc-mode)
@@ -123,7 +123,7 @@
      (propertize "(" 'face (statusbar-shadow))
      (propertize
       (concat
-       (statusbar-file-vc-status-string)
+       ;; (statusbar-file-vc-status-string)
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
       'mouse-face (statusbar-default)
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
@@ -167,6 +167,15 @@
 
 
 ;;; Layouts
+
+(defun statusbar (LEFT &optional RIGHT)
+  (let* ((left-text (format-mode-line LEFT))
+         (right-text (if RIGHT
+                         (misc--pad (- (window-total-width)
+                                       (length left-text))
+                                    RIGHT)
+                       "")))
+    (concat left-text right-text)))
 
 (defun statusbar-hide ()
   (setq mode-line-format ()))
