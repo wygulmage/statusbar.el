@@ -28,17 +28,17 @@
 
 ;;; Buffer info
 
-(defvar-local statusbar--buffer-line-count nil)
+;; (defvar-local statusbar--buffer-line-count nil)
 (defun statusbar--buffer-line-count (&rest _) ; `after-change-functions' passes args.
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
-  (setq statusbar--buffer-line-count
-        (count-lines (point-min) (point-max)))
-  statusbar--buffer-line-count)
+  ;; (setq statusbar--buffer-line-count
+  (count-lines (point-min) (point-max)))
+  ;; statusbar--buffer-line-count)
 
-(hook-up
- [buffer-list-update-hook
-  after-change-functions]
- [statusbar--buffer-line-count])
+;; (hook-up
+;;  [buffer-list-update-hook
+;;   after-change-functions]
+;;  [statusbar--buffer-line-count])
 
 (defun statusbar--buffer-file-like-p ()
   "Is the buffer visiting something that should be a file?"
@@ -97,11 +97,9 @@
     statusbar--file-vc-status))
 
 (hook-up
- [
-  after-save-hook
+ [after-save-hook
   find-file-hook
-  first-change-hook
-  ]
+  first-change-hook]
  [statusbar--file-vc-status])
 
 (defun statusbar-file-vc-status-string ()
@@ -134,7 +132,7 @@
 
 (defun statusbar-line-position-string ()
   "Current line / total lines. Click to toggle line numbers."
-  (let ((lines (number-to-string statusbar--buffer-line-count)))
+  (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
      (concat
       (misc--pad (length lines) (format-mode-line "%l"))
@@ -155,6 +153,9 @@
          (propertize "]" 'face (statusbar-shadow)))))
   (defun statusbar-window-number-string () "Empty string" ""))
 
+
+;;; Utility procedures
+
 (defun concat-when-first (&rest STRINGS)
   (when STRINGS
     (if (or (null (car STRINGS))
@@ -164,7 +165,9 @@
 
   ;;; TODO: Create shortened mode-line faces for a collapsed but visible mode line.
 
-;;; Statusbar layouts
+
+;;; Layouts
+
 (defun statusbar-hide ()
   (setq mode-line-format ()))
 
