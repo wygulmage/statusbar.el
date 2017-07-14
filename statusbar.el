@@ -6,6 +6,14 @@
 
 ;;; TODO: Make active mode line inactive on mouse focus loss.
 
+;;; Notes:
+;; With `mode-line-format' = nil, things look best with `bottom-divider-width' = 1; the vertical `window-divider' is automatically full height.
+;; With only one pane ('window'), things look best with `mode-line' :box nil and :overline and `window-divider' as whatever the box was.
+
+;; For a B&W terminal, the best we can do is make the active mode-line invert gamma and the inactive mode-lines regular gamma. Then we only need a box around inactive mode lines.
+
+;; For a grayscale terminal
+
 ;;; Faces
 
 (fac-def-adaptive-faces 'statusbar
