@@ -148,9 +148,10 @@
       "The window's number if we can get it."
       (when (cdr (window-list nil 0))
         (concat
-         (propertize "[" 'face (statusbar-shadow))
+         ;; (propertize "[" 'face (statusbar-shadow))
          (winum-get-number-string)
-         (propertize "]" 'face (statusbar-shadow)))))
+         " ")))
+  ;; (propertize "]" 'face (statusbar-shadow)))))
   (defun statusbar-window-number-string () "Empty string" ""))
 
 
@@ -181,29 +182,38 @@ Otherwise return STRING."
 ;;; Layouts
 
 (defun statusbar (LEFT &optional RIGHT)
-  (let ((left-string (format-mode-line LEFT))
-        (if (not RIGHT)
-            left-string
-          (let ((right-string (format-mode-line RIGHT)))
-            `(,(statusbar--exact-width-string (string-width right-string)
-                                              (format-mode-line LEFT))
-              ,right-string))))))
+  ;; There are two ways I could do this: with strings or with mode-line constructs. Doing it with strings is probably more efficient, but may be less amenable to reuse.
+  (let ((left-string (format-mode-line LEFT)))
+    (if (or (not RIGHT) (eq RIGHT ""))
+        left-string
+      (let ((right-string (format-mode-line RIGHT)))
+        (concat (statusbar--exact-width-string (- (window-total-width)
+                                                  (string-width right-string))
+                                               (format-mode-line LEFT))
+                right-string)))))
 
 (defun statusbar-hide ()
   (setq mode-line-format ()))
 
-(defvar statusbar-base-layout
+(defvar statusbar-base-left
   '(:eval
     (concat
-     (statusbar-window-number-string)
-     " "
      (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
      " "
      (statusbar-vc-branch-string)
      "  "
-     (statusbar-line-position-string)
-     ))
+     (statusbar-line-position-string))))
+
+(defvar statusbar-base-right
+  '(:eval
+    (statusbar-window-number-string)))
+
+(defvar statusbar-base-layout
+  '(:eval
+    (statusbar
+     statusbar-base-left
+     statusbar-base-right))
   "a simple status bar")
 
 (defun statusbar-use-base-layout ()
@@ -211,16 +221,29 @@ Otherwise return STRING."
         statusbar-layout statusbar-base-layout))
 
 (defvar statusbar-prog-mode-layout
-  (list
-   statusbar-base-layout
-   '(:eval
-     (concat
-      "  "
-      (statusbar-major-mode-name)
-      "  "
-      (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
-      )))
-  "simple status bar that indicates the current mode")
+  '(:eval
+    (statusbar
+     `(,statusbar-base-left
+       (:eval
+        (concat
+         "  "
+         (statusbar-major-mode-name))))
+     `((:eval
+        (concat
+         (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
+         " "))
+       ,statusbar-base-right))))
+
+;; (list
+;;  statusbar-base-layout
+;;  '(:eval
+;;    (concat
+;;     "  "
+;;     (statusbar-major-mode-name)
+;;     "  "
+;;     (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
+;;     )))
+;; "simple status bar that indicates the current mode")
 
 (defun statusbar-use-prog-mode-layout ()
   (setq mode-line-format statusbar-prog-mode-layout
