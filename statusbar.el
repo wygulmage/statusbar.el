@@ -156,7 +156,19 @@
 
 ;;; Utility procedures
 
-(defun concat-when-first (&rest STRINGS)
+(defun statusbar--exact-width-string (WIDTH STRING)
+  "If WIDTH is greater than the width of STRING, pad string with zeros on the right.
+If WIDTH is less than the width of STRING, truncate STRING with an ellipsis.
+Otherwise return STRING."
+  (let ((initial-width (string-width STRING)))
+    (cond ((= WIDTH initial-width)
+           STRING)
+          ((< WIDTH initial-width)
+           (concat (substring STRING 0 (- WIDTH 1))
+                   truncate-string-ellipsis))
+          (t (misc--pad (- WIDTH) STRING)))))
+
+(defun statusbar--concat-when-first (&rest STRINGS)
   (when STRINGS
     (if (or (null (car STRINGS))
             (string= "" (car STRINGS)))
@@ -169,13 +181,13 @@
 ;;; Layouts
 
 (defun statusbar (LEFT &optional RIGHT)
-  (let* ((left-text (format-mode-line LEFT))
-         (right-text (if RIGHT
-                         (misc--pad (- (window-total-width)
-                                       (length left-text))
-                                    RIGHT)
-                       "")))
-    (concat left-text right-text)))
+  (let ((left-string (format-mode-line LEFT))
+        (if (not RIGHT)
+            left-string
+          (let ((right-string (format-mode-line RIGHT)))
+            `(,(statusbar--exact-width-string (string-width right-string)
+                                              (format-mode-line LEFT))
+              ,right-string))))))
 
 (defun statusbar-hide ()
   (setq mode-line-format ()))
