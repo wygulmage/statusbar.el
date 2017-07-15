@@ -164,8 +164,21 @@
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
      (propertize ")" 'face (statusbar-shadow)))))
 
-
 (defun statusbar-line-position-string ()
+  "Current line / total lines. Click to toggle line numbers."
+  (let ((lines (number-to-string (statusbar--buffer-line-count))))
+    (propertize
+     (concat
+      (format-mode-line "%l")
+      (propertize "/" 'face (statusbar-shadow))
+      lines)
+     'help-echo (if (bound-and-true-p linum-mode)
+                    "Hide line numbers."
+                  "Show line numbers.")
+     'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
+
+
+(defun statusbar-line-position-string-padded ()
   "Current line / total lines. Click to toggle line numbers."
   (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
@@ -236,13 +249,14 @@ Otherwise return STRING."
      (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
      " "
-     (statusbar-vc-branch-string)
-     "  "
-     (statusbar-line-position-string))))
+     (statusbar-vc-branch-string))))
 
 (defvar statusbar-base-right
   '(:eval
-    (statusbar-window-number-string)))
+    (concat
+     (statusbar-line-position-string)
+     " "
+     (statusbar-window-number-string))))
 
 (defvar statusbar-base-layout
   '(:eval
