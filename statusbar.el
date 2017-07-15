@@ -4,6 +4,16 @@
 
 (setq-default statusbar-layout mode-line-format)
 
+;;; TODO: Make active mode line inactive on mouse focus loss.
+
+;;; Notes:
+;; With `mode-line-format' = nil, things look best with `bottom-divider-width' = 1; the vertical `window-divider' is automatically full height.
+;; With only one pane ('window'), things look best with `mode-line' :box nil and :overline and `window-divider' as whatever the box was.
+
+;; For a B&W terminal, the best we can do is make the active mode-line invert gamma and the inactive mode-lines regular gamma. Then we only need a box around inactive mode lines.
+
+;; For a grayscale terminal
+
 ;;; Faces
 
 (fac-def-adaptive-faces 'statusbar
@@ -26,6 +36,31 @@
     (:inherit statusbar-default-inactive)
     fac-fade-foreground))
 
+(defun statusbar--normalize-box (FACE)
+  "The :box property of FACE as a list."
+  (pcase (face-attribute FACE :box)
+    ('nil nil)
+    ('t `(:color ,(face-attribute 'default :color)
+                 :line-width 1))
+    ((and (pred consp) x) x)
+    (x `(:color ,x :line-width 1))))
+
+(defun statusbar--‘box’ ()
+  "Transfer the :box attribute of the mode line into an :overline and a `bottom-divider'. Unfortunately, because the mode-line does not show left or right dividers, this does not look great with side-by-side panes."
+  (when-let
+      ((box (statusbar--normalize-box 'mode-line))
+       (color (plist-get box :color))
+       (width (plist-get box :line-width)))
+    (fac-set-faces-attributes
+     [mode-line mode-line-inactive]
+     :box nil
+     :overline color)
+    (fac-set-faces-attributes
+     [window-divider]
+     :foreground color
+     :background color)
+    (set-frame-parameter nil 'bottom-divider-width width)))
+
 ;;; Buffer info
 
 ;; (defvar-local statusbar--buffer-line-count nil)
@@ -33,7 +68,7 @@
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
   ;; (setq statusbar--buffer-line-count
   (count-lines (point-min) (point-max)))
-  ;; statusbar--buffer-line-count)
+;; statusbar--buffer-line-count)
 
 ;; (hook-up
 ;;  [buffer-list-update-hook
@@ -76,7 +111,7 @@
 (defun statusbar-buffer-write-status-string ()
   "Show whether a file-like buffer has been modified since its last save; click to save."
   (if (not (statusbar--buffer-file-like-p))
-      "" ; Ignore buffers that aren't files.
+      " " ; Ignore buffers that aren't files.
     (misc--pad 1 (propertize
                   (concat (when (buffer-modified-p) "◆")
                           (when buffer-read-only "🔒"))
@@ -166,7 +201,7 @@ Otherwise return STRING."
            STRING)
           ((< WIDTH initial-width)
            (concat (substring STRING 0 (- WIDTH 1))
-                   truncate-string-ellipsis))
+                   "…")) ; more reliable than `truncate-string-ellipsis'
           (t (misc--pad (- WIDTH) STRING)))))
 
 (defun statusbar--concat-when-first (&rest STRINGS)
