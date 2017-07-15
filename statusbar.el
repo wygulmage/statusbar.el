@@ -221,14 +221,14 @@ Otherwise return STRING."
         statusbar-layout statusbar-base-layout))
 
 (defvar statusbar-prog-mode-layout
-  '(:eval
+  `(:eval
     (statusbar
-     `(,statusbar-base-left
+     '(,statusbar-base-left
        (:eval
         (concat
          "  "
          (statusbar-major-mode-name))))
-     `((:eval
+     '((:eval
         (concat
          (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
          " "))
