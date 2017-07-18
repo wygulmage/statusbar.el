@@ -61,6 +61,18 @@
      :background color)
     (set-frame-parameter nil 'bottom-divider-width width)))
 
+;; Space:
+(defvar statusbar-styled-space
+  `(:propertize " " 'face (statusbar-default))
+  "space styled like the rest of the statusbar")
+(defvar statusbar-blank-space
+  (propertize " " 'face 'default)
+  "unstyled space")
+
+(defvar statusbar-edge-padding
+  statusbar-styled-space
+  "The padding at the edges of the statusbar. Change this for a different look.")
+
 ;;; Buffer info
 
 ;; (defvar-local statusbar--buffer-line-count nil)
@@ -68,7 +80,7 @@
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
   ;; (setq statusbar--buffer-line-count
   (count-lines (point-min) (point-max)))
-;; statusbar--buffer-line-count)
+  ;; statusbar--buffer-line-count)
 
 ;; (hook-up
 ;;  [buffer-list-update-hook
@@ -89,6 +101,8 @@
   (if buffer-file-truename
       (propertize
        (buffer-name)
+       'face
+       (statusbar-default)
        'help-echo (abbreviate-file-name buffer-file-truename)
        'local-map (make-mode-line-mouse-map
                    'mouse-1 (lambda () (interactive)
@@ -98,13 +112,16 @@
 (defun statusbar-primary-file-or-buffer-name ()
   "The name of the file or buffer in the primary pane."
   (let ((b (window-buffer primary-pane)))
-    (or (statusbar--buffer-file-path b)
-        (buffer-name b))))
+    (propertize
+     (or (statusbar--buffer-file-path b)
+         (buffer-name b))
+     'face (statusbar-default))))
 
 (defun statusbar-major-mode-name ()
   "The buffer's major-mode"
   (propertize
    mode-name
+   'face (statusbar-default)
    'help-echo "Click mouse 1 for mode menu, mouse 2 for mode info, or mouse 3 to toggle minor modes."
    'local-map mode-line-major-mode-keymap))
 
@@ -112,15 +129,19 @@
   "Show whether a file-like buffer has been modified since its last save; click to save."
   (if (not (statusbar--buffer-file-like-p))
       " " ; Ignore buffers that aren't files.
-    (misc--pad 1 (propertize
-                  (concat (when (buffer-modified-p) "◆")
-                          (when buffer-read-only "🔒"))
-                  'help-echo
-                  (concat (when (buffer-modified-p) "modified ")
-                          (when buffer-read-only "read-only ")
-                          (if buffer-file-name "file " "buffer ")
-                          "‑ click to save")
-                  'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
+    (propertize
+     (misc--pad
+      1
+      (propertize
+       (concat (when (buffer-modified-p) "◆")
+               (when buffer-read-only "🔒"))
+       'help-echo
+       (concat (when (buffer-modified-p) "modified ")
+               (when buffer-read-only "read-only ")
+               (if buffer-file-name "file " "buffer ")
+               "‑ click to save")
+       'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))
+     'font (statusbar-default))))
 
 
 ;; (defvar-local statusbar--file-vc-status nil
@@ -160,6 +181,7 @@
       (concat
        ;; (statusbar-file-vc-status-string)
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
+      'face (statusbar-default)
       'mouse-face (statusbar-default)
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
      (propertize ")" 'face (statusbar-shadow)))))
@@ -170,9 +192,13 @@
   (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
      (concat
-      (misc--pad (length lines) (format-mode-line "%l"))
+      (propertize
+       (misc--pad (length lines) (format-mode-line "%l"))
+       'font (statusbar-default))
       (propertize "/" 'face (statusbar-shadow))
-      lines)
+      (propertize
+       lines
+       'font (statusbar-default)))
      'help-echo (if (bound-and-true-p linum-mode)
                     "Hide line numbers."
                   "Show line numbers.")
@@ -184,7 +210,9 @@
       (when (cdr (window-list nil 0))
         (concat
          ;; (propertize "[" 'face (statusbar-shadow))
-         (winum-get-number-string)
+         (propertize
+          (winum-get-number-string)
+          'face (statusbar-default))
          " ")))
   ;; (propertize "]" 'face (statusbar-shadow)))))
   (defun statusbar-window-number-string () "Empty string" ""))
@@ -222,27 +250,31 @@ Otherwise return STRING."
     (if (or (not RIGHT) (eq RIGHT ""))
         left-string
       (let ((right-string (format-mode-line RIGHT)))
-        (concat (statusbar--exact-width-string (- (window-total-width)
-                                                  (string-width right-string))
-                                               (format-mode-line LEFT))
+        (concat (statusbar--exact-width-string
+                 (- (window-total-width)
+                    (string-width right-string))
+                 (format-mode-line LEFT))
                 right-string)))))
 
 (defun statusbar-hide ()
   (setq mode-line-format ()))
 
 (defvar statusbar-base-left
-  '(:eval
+  `(:eval
     (concat
+     statusbar-edge-padding
      (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
-     " "
+     statusbar-styled-space
      (statusbar-vc-branch-string)
-     "  "
+     statusbar-styled-space
      (statusbar-line-position-string))))
 
 (defvar statusbar-base-right
-  '(:eval
-    (statusbar-window-number-string)))
+  `(:eval
+    (concat
+     (statusbar-window-number-string)
+     statusbar-edge-padding)))
 
 (defvar statusbar-base-layout
   '(:eval
@@ -254,6 +286,12 @@ Otherwise return STRING."
 (defun statusbar-use-base-layout ()
   (setq mode-line-format statusbar-base-layout
         statusbar-layout statusbar-base-layout))
+
+(defvar statusbar-indented-base-layout
+  '(:eval
+    (statusbar-indented
+     statusbar-base-left
+     statusbar-base-right)))
 
 (defvar statusbar-prog-mode-layout
   '(:eval
