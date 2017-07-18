@@ -186,8 +186,24 @@
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
      (propertize ")" 'face (statusbar-shadow)))))
 
-
 (defun statusbar-line-position-string ()
+  "Current line / total lines. Click to toggle line numbers."
+  (let ((lines (number-to-string (statusbar--buffer-line-count))))
+    (propertize
+     (concat
+      (propertize
+       (format-mode-line "%l")
+       'font (statusbar-default))
+      (propertize "/" 'face (statusbar-shadow))
+      (propertize
+       lines
+       'font (statusbar-default)))
+     'help-echo (if (bound-and-true-p linum-mode)
+                    "Hide line numbers."
+                  "Show line numbers.")
+     'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
+
+(defun statusbar-line-position-string-padded ()
   "Current line / total lines. Click to toggle line numbers."
   (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
@@ -266,13 +282,13 @@ Otherwise return STRING."
      (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
      statusbar-styled-space
-     (statusbar-vc-branch-string)
-     statusbar-styled-space
-     (statusbar-line-position-string))))
+     (statusbar-vc-branch-string))))
 
 (defvar statusbar-base-right
   `(:eval
     (concat
+     (statusbar-line-position-string)
+     statusbar-styled-space
      (statusbar-window-number-string)
      statusbar-edge-padding)))
 
@@ -294,17 +310,17 @@ Otherwise return STRING."
      statusbar-base-right)))
 
 (defvar statusbar-prog-mode-layout
-  '(:eval
+  `(:eval
     (statusbar
-     `(,statusbar-base-left
+     '(,statusbar-base-left
        (:eval
         (concat
-         "  "
+         statusbar-styled-space
          (statusbar-major-mode-name))))
-     `((:eval
+     '((:eval
         (concat
          (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
-         " "))
+         statusbar-styled-space))
        ,statusbar-base-right))))
 
 ;; (list
