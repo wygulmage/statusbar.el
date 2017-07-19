@@ -63,7 +63,7 @@
 
 ;; Space:
 (defvar statusbar-styled-space
-  `(:propertize " " 'face (statusbar-default))
+  `(propertize " " 'face (statusbar-default))
   "space styled like the rest of the statusbar")
 (defvar statusbar-blank-space
   (propertize " " 'face 'default)
@@ -291,12 +291,12 @@ Otherwise return STRING."
      '(,statusbar-base-left
        (:eval
         (concat
-         statusbar-styled-space
+         " "
          (statusbar-major-mode-name))))
      '((:eval
         (concat
          (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
-         statusbar-styled-space))
+         " "))
        ,statusbar-base-right))))
 
 ;; (list
