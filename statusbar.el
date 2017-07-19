@@ -62,15 +62,12 @@
     (set-frame-parameter nil 'bottom-divider-width width)))
 
 ;; Space:
-(defvar statusbar-styled-space
-  `(propertize " " 'face (statusbar-default))
-  "space styled like the rest of the statusbar")
 (defvar statusbar-blank-space
   (propertize " " 'face 'default)
   "unstyled space")
 
 (defvar statusbar-edge-padding
-  statusbar-styled-space
+  " "
   "The padding at the edges of the statusbar. Change this for a different look.")
 
 ;;; Buffer info
