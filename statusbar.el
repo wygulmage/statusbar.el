@@ -199,7 +199,8 @@
     (defun statusbar-pane-number-string ()
       "The window's number if we can get it."
       (when (cdr (window-list nil 0))
-        (winum-get-number-string)))
+        (propertize (winum-get-number-string)
+                    'face (statusbar-emphasized-active))))
   (defun statusbar-pane-number-string () "Empty string" ""))
 
 
