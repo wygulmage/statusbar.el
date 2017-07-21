@@ -14,6 +14,12 @@
 
 ;; For a grayscale terminal
 
+
+;;; Position
+(defvar statusbar-position 'bottom
+  "The position of the statusbar.
+Possible values: 'bottom :top")
+
 ;;; Faces
 
 (fac-def-adaptive-faces 'statusbar
@@ -111,6 +117,12 @@
    mode-name
    'help-echo "Click mouse 1 for mode menu, mouse 2 for mode info, or mouse 3 to toggle minor modes."
    'local-map mode-line-major-mode-keymap))
+
+(defun statusbar-major-prog-mode-name ()
+  "The buffer's major mode, if it's derived from prog-mode."
+  (if (derived-mode-p 'prog-mode)
+      (statusbar-major-mode-name)
+    ""))
 
 (defun statusbar-buffer-write-status-string ()
   "Show whether a file-like buffer has been modified since its last save; click to save."
@@ -256,7 +268,9 @@ Otherwise return STRING."
      (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
      " "
-     (statusbar-vc-branch-string))))
+     (statusbar-vc-branch-string)
+     " "
+     (statusbar-major-prog-mode-name))))
 
 (defvar statusbar-base-right
   `(:eval
@@ -273,38 +287,21 @@ Otherwise return STRING."
      statusbar-base-right))
   "a simple status bar")
 
+(defun statusbar-use-layout (LAYOUT)
+  (if (eq statusbar-position :top)
+      (setq header-line-format LAYOUT
+            mode-line-format ())
+    (setq mode-line-format LAYOUT)))
+
 (defun statusbar-use-base-layout ()
-  (setq mode-line-format statusbar-base-layout
-        statusbar-layout statusbar-base-layout))
+  (statusbar-use-layout statusbar-base-layout))
 
 (defvar statusbar-prog-mode-layout
-  `(:eval
-    (statusbar
-     '(,statusbar-base-left
-       (:eval
-        (concat
-         " "
-         (statusbar-major-mode-name))))
-     '((:eval
-        (concat
-         (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
-         " "))
-       ,statusbar-base-right))))
-
-;; (list
-;;  statusbar-base-layout
-;;  '(:eval
-;;    (concat
-;;     "  "
-;;     (statusbar-major-mode-name)
-;;     "  "
-;;     (when (bound-and-true-p anzu-mode) (anzu--update-mode-line))
-;;     )))
-;; "simple status bar that indicates the current mode")
+  statusbar-base-layout)
 
 (defun statusbar-use-prog-mode-layout ()
-  (setq mode-line-format statusbar-prog-mode-layout
-        statusbar-layout statusbar-prog-mode-layout))
+  "Depreciated"
+  (statusbar-use-layout statusbar-base-layout))
 
 (defun statusbar-use-echo-area ()
   "Use the echo area instead of the mode line. This disables all key maps, of course, since the echo area doesn't have a key map."
