@@ -31,24 +31,19 @@
              :inherit statusbar-default-inactive)
     fac-intensify-foreground)
   '(shadow
-    "a dimmed face for the mode-line"
+    "a dimmed face for the statusbar"
     (:inherit statusbar-default-active)
     (:inherit statusbar-default-inactive)
-    fac-fade-foreground))
-
-(defun statusbar--normalize-box (FACE)
-  "The :box property of FACE as a list."
-  (pcase (face-attribute FACE :box)
-    ('nil nil)
-    ('t `(:color ,(face-attribute 'default :color)
-                 :line-width 1))
-    ((and (pred consp) x) x)
-    (x `(:color ,x :line-width 1))))
+    fac-fade-foreground)
+  '(emphasized-active
+    "a face emphasized only in the active statusbar"
+    (:weight bold :inherit statusbar-default-active)
+    (:inherit statusbar-default-inactive)))
 
 (defun statusbar--‘box’ ()
   "Transfer the :box attribute of the mode line into an :overline and a `bottom-divider'. Unfortunately, because the mode-line does not show left or right dividers, this does not look great with side-by-side panes."
   (when-let
-      ((box (statusbar--normalize-box 'mode-line))
+      ((box (fac-normalize-box 'mode-line))
        (color (plist-get box :color))
        (width (plist-get box :line-width)))
     (fac-set-faces-attributes
@@ -68,7 +63,7 @@
 
 (defvar statusbar-edge-padding
   " "
-  "The padding at the edges of the statusbar. Change this for a different look.")
+  "The padding at the edges of the statusbar. Change this to e.g. `statusbar-blank-space' for a different look.")
 
 ;;; Buffer info
 
@@ -201,12 +196,11 @@
      'local-map (make-mode-line-mouse-map 'mouse-1 #'linum-mode))))
 
 (if (fboundp 'winum-get-number-string)
-    (defun statusbar-window-number-string ()
+    (defun statusbar-pane-number-string ()
       "The window's number if we can get it."
       (when (cdr (window-list nil 0))
         (winum-get-number-string)))
-  ;; (propertize "]" 'face (statusbar-shadow)))))
-  (defun statusbar-window-number-string () "Empty string" ""))
+  (defun statusbar-pane-number-string () "Empty string" ""))
 
 
 ;;; Utility procedures
@@ -268,7 +262,7 @@ Otherwise return STRING."
     (concat
      (statusbar-line-position-string)
      " "
-     (statusbar-window-number-string)
+     (statusbar-pane-number-string)
      statusbar-edge-padding)))
 
 (defvar statusbar-base-layout
