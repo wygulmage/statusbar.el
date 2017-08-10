@@ -237,8 +237,6 @@ Otherwise return STRING."
         ""
       (apply #'concat STRINGS))))
 
-  ;;; TODO: Create shortened mode-line faces for a collapsed but visible mode line.
-
 
 ;;; Layouts
 
@@ -293,7 +291,8 @@ This keeps a bottom border even when you have other borders disabled."
   (fac-set-faces-attributes
    [mode-line mode-line-inactive]
    :height 0.1
-   :underline (face-attribute 'border :foreground))
+   :underline (face-attribute 'border :foreground)
+   :background (face-attribute 'default :background))
   (setq mode-line-format " "))
 
 (defun statusbar-use-layout (LAYOUT)
