@@ -287,6 +287,14 @@ Otherwise return STRING."
      statusbar-base-right))
   "a simple status bar")
 
+(defun statusbar-collapse-mode-line ()
+  "Collapse the mode-line to a line."
+  (fac-set-faces-attributes
+   [mode-line mode-line-inactive]
+   :height 0.1
+   :underline (face-attribute 'border :foreground))
+  (setq mode-line-format " "))
+
 (defun statusbar-use-layout (LAYOUT)
   (if (eq statusbar-position :top)
       (setq header-line-format LAYOUT
