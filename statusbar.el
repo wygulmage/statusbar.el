@@ -288,7 +288,8 @@ Otherwise return STRING."
   "a simple status bar")
 
 (defun statusbar-collapse-mode-line ()
-  "Collapse the mode-line to a line."
+  "Collapse the mode-line to a line.
+This keeps a bottom border even when you have other borders disabled."
   (fac-set-faces-attributes
    [mode-line mode-line-inactive]
    :height 0.1
