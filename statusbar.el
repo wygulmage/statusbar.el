@@ -1,9 +1,9 @@
 ;;; statusbar.el --- simple clean statusbar -*- lexical-binding: t -*-
 (mapc #'require [
                  fac
-                 hook-up; not used right now.
                  primary-pane
-                 miscellaneous])
+                 miscellaneous
+                 ])
 
 (setq-default statusbar-layout mode-line-format)
 
@@ -136,23 +136,14 @@ Possible values: 'bottom :top")
       'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
 
 
-(defvar-local statusbar--file-vc-status nil
-  "The version-control status of the current file.")
-(defun statusbar--file-vc-status ()
+(defun statusbar-file-vc-status ()
   "Get and set the version-control status of the file visited by the current buffer."
   (let ((f (statusbar--buffer-file-path)))
-    (setq statusbar--file-vc-status (and f (vc-state f)))
-    statusbar--file-vc-status))
-
-(hook-up
- [after-save-hook
-  find-file-hook
-  first-change-hook]
- [statusbar--file-vc-status])
+    (and f (vc-state f))))
 
 (defun statusbar-file-vc-status-string ()
   "A string that represents the VC status of the file visited by the current buffer."
-  (pcase statusbar--file-vc-status
+  (pcase (statusbar-file-vc-status)
     (`up-to-date "")
     (`ignored "")
     (`edited "◆ ")
