@@ -1,6 +1,9 @@
 ;;; statusbar.el --- simple clean statusbar -*- lexical-binding: t -*-
-(mapc #'require
-      [fac hook-up primary-pane miscellaneous])
+(mapc #'require [
+                 fac
+                 hook-up; not used right now.
+                 primary-pane
+                 miscellaneous])
 
 (setq-default statusbar-layout mode-line-format)
 
@@ -73,17 +76,9 @@ Possible values: 'bottom :top")
 
 ;;; Buffer info
 
-;; (defvar-local statusbar--buffer-line-count nil)
 (defun statusbar--buffer-line-count (&rest _) ; `after-change-functions' passes args.
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
-  ;; (setq statusbar--buffer-line-count
   (count-lines (point-min) (point-max)))
-  ;; statusbar--buffer-line-count)
-
-;; (hook-up
-;;  [buffer-list-update-hook
-;;   after-change-functions]
-;;  [statusbar--buffer-line-count])
 
 (defun statusbar--buffer-file-like-p ()
   "Is the buffer visiting something that should be a file?"
@@ -141,33 +136,33 @@ Possible values: 'bottom :top")
       'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
 
 
-;; (defvar-local statusbar--file-vc-status nil
-;;   "The version-control status of the current file.")
-;; (defun statusbar--file-vc-status ()
-;;   "Get and set the version-control status of the file visited by the current buffer."
-;;   (let ((f (statusbar--buffer-file-path)))
-;;     (setq statusbar--file-vc-status (and f (vc-state f)))
-;;     statusbar--file-vc-status))
+(defvar-local statusbar--file-vc-status nil
+  "The version-control status of the current file.")
+(defun statusbar--file-vc-status ()
+  "Get and set the version-control status of the file visited by the current buffer."
+  (let ((f (statusbar--buffer-file-path)))
+    (setq statusbar--file-vc-status (and f (vc-state f)))
+    statusbar--file-vc-status))
 
-;; (hook-up
-;;  [after-save-hook
-;;   find-file-hook
-;;   first-change-hook]
-;;  [statusbar--file-vc-status])
+(hook-up
+ [after-save-hook
+  find-file-hook
+  first-change-hook]
+ [statusbar--file-vc-status])
 
-;; (defun statusbar-file-vc-status-string ()
-;;   "A string that represents the VC status of the file visited by the current buffer."
-;;   (pcase statusbar--file-vc-status
-;;     (`up-to-date "")
-;;     (`ignored "")
-;;     (`edited "◆ ")
-;;     (`needs-update "U ")
-;;     (`needs-merge "M ")
-;;     (`added "+ ")
-;;     (`removed "- ")
-;;     (`conflict "! ")
-;;     (`missing "? ")
-;;     (_ nil))) ; Let me know if I'm missing a state.
+(defun statusbar-file-vc-status-string ()
+  "A string that represents the VC status of the file visited by the current buffer."
+  (pcase statusbar--file-vc-status
+    (`up-to-date "")
+    (`ignored "")
+    (`edited "◆ ")
+    (`needs-update "U ")
+    (`needs-merge "M ")
+    (`added "+ ")
+    (`removed "- ") ; or 🗑
+    (`conflict "! ")
+    (`missing "? ")
+    (_ nil))) ; Let me know if I'm missing a state.
 
 (defun statusbar-vc-branch-string ()
   (if (not vc-mode)
@@ -176,7 +171,7 @@ Possible values: 'bottom :top")
      (propertize "(" 'face (statusbar-shadow))
      (propertize
       (concat
-       ;; (statusbar-file-vc-status-string)
+       (statusbar-file-vc-status-string)
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
      (propertize ")" 'face (statusbar-shadow)))))
@@ -263,8 +258,8 @@ Otherwise return STRING."
   `(:eval
     (concat
      statusbar-edge-padding
-     (statusbar-buffer-write-status-string)
      (statusbar-buffer-name)
+     (statusbar-buffer-write-status-string)
      " "
      (statusbar-vc-branch-string)
      " "
