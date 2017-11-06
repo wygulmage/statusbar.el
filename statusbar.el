@@ -136,25 +136,6 @@ Possible values: 'bottom :top")
       'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
 
 
-(defun statusbar-file-vc-status ()
-  "Get and set the version-control status of the file visited by the current buffer."
-  (let ((f (statusbar--buffer-file-path)))
-    (and f (vc-state f))))
-
-(defun statusbar-file-vc-status-string ()
-  "A string that represents the VC status of the file visited by the current buffer."
-  (pcase (statusbar-file-vc-status)
-    (`up-to-date "")
-    (`ignored "")
-    (`edited "◆ ")
-    (`needs-update "U ")
-    (`needs-merge "M ")
-    (`added "+ ")
-    (`removed "- ") ; or 🗑
-    (`conflict "! ")
-    (`missing "? ")
-    (_ nil))) ; Let me know if I'm missing a state.
-
 (defun statusbar-vc-branch-string ()
   (if (not vc-mode)
       ""
@@ -162,7 +143,6 @@ Possible values: 'bottom :top")
      (propertize "(" 'face (statusbar-shadow))
      (propertize
       (concat
-       (statusbar-file-vc-status-string)
        (replace-regexp-in-string " Git[:\-]" "" vc-mode))
       'local-map (make-mode-line-mouse-map 'mouse-1 #'magit-status))
      (propertize ")" 'face (statusbar-shadow)))))
