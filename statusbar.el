@@ -122,18 +122,16 @@ Possible values: 'bottom :top")
 (defun statusbar-buffer-write-status-string ()
   "Show whether a file-like buffer has been modified since its last save; click to save."
   (if (not (statusbar--buffer-file-like-p))
-      " " ; Ignore buffers that aren't files.
-    (misc--pad
-     1
-     (propertize
-      (concat (when (buffer-modified-p) "◆")
-              (when buffer-read-only "🔒"))
-      'help-echo
-      (concat (when (buffer-modified-p) "modified ")
-              (when buffer-read-only "read-only ")
-              (if buffer-file-name "file " "buffer ")
-              "‑ click to save")
-      'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer)))))
+      "" ; Ignore buffers that aren't files.
+    (propertize
+     (concat (when (buffer-modified-p) "◆")
+             (when buffer-read-only "🔒"))
+     'help-echo
+     (concat (when (buffer-modified-p) "modified ")
+             (when buffer-read-only "read-only ")
+             (if buffer-file-name "file " "buffer ")
+             "‑ click to save")
+     'local-map (make-mode-line-mouse-map 'mouse-1 #'save-buffer))))
 
 
 (defun statusbar-vc-branch-string ()
@@ -230,7 +228,7 @@ Otherwise return STRING."
     (concat
      statusbar-edge-padding
      (statusbar-buffer-name)
-     (statusbar-buffer-write-status-string)
+     (misc--pad 1 (statusbar-buffer-write-status-string))
      " "
      (statusbar-vc-branch-string)
      " "
