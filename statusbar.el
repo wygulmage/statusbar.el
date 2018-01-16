@@ -19,9 +19,9 @@
 
 
 ;;; Position
-(defvar statusbar-position 'bottom
+(defvar statusbar-position :bottom
   "The position of the statusbar.
-Possible values: 'bottom :top")
+Possible values: :bottom :top")
 
 ;;; Faces
 
@@ -87,6 +87,7 @@ Possible values: 'bottom :top")
 
 (defun statusbar--buffer-file-path ()
   "The file path if the current buffer is a file, otherwise nil."
+  (declare (side-effect-free t))
   (and buffer-file-truename (abbreviate-file-name buffer-file-truename)))
 
 (defun statusbar-buffer-name ()
