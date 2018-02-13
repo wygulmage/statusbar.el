@@ -73,17 +73,9 @@ Possible values: 'bottom :top")
 
 ;;; Buffer info
 
-;; (defvar-local statusbar--buffer-line-count nil)
 (defun statusbar--buffer-line-count (&rest _) ; `after-change-functions' passes args.
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
-  ;; (setq statusbar--buffer-line-count
   (count-lines (point-min) (point-max)))
-  ;; statusbar--buffer-line-count)
-
-;; (hook-up
-;;  [buffer-list-update-hook
-;;   after-change-functions]
-;;  [statusbar--buffer-line-count])
 
 (defun statusbar--buffer-file-like-p ()
   "Is the buffer visiting something that should be a file?"
@@ -268,7 +260,7 @@ Otherwise return STRING."
      " "
      (statusbar-vc-branch-string)
      " "
-     (statusbar-major-prog-mode-name))))
+     (statusbar-major-mode-name))))
 
 (defvar statusbar-base-right
   `(:eval
@@ -287,7 +279,8 @@ Otherwise return STRING."
 
 (defun statusbar-collapse-mode-line ()
   "Collapse the mode-line to a line.
-This keeps a bottom border even when you have other borders disabled."
+This keeps a bottom border even when you have other borders disabled.\n
+Warning: This will collapse all mode-lines in the frame, and does not save the mode-line height."
   (fac-set-faces-attributes
    [mode-line mode-line-inactive]
    :height 0.1
@@ -302,13 +295,6 @@ This keeps a bottom border even when you have other borders disabled."
     (setq mode-line-format LAYOUT)))
 
 (defun statusbar-use-base-layout ()
-  (statusbar-use-layout statusbar-base-layout))
-
-(defvar statusbar-prog-mode-layout
-  statusbar-base-layout)
-
-(defun statusbar-use-prog-mode-layout ()
-  "Depreciated"
   (statusbar-use-layout statusbar-base-layout))
 
 (defun statusbar-use-echo-area ()
