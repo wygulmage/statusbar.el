@@ -78,20 +78,24 @@ Possible values: :bottom :top")
 
 (defun statusbar--buffer-line-count (&rest _) ; `after-change-functions' passes args.
   "Number of lines in the current buffer. If the last line of the buffer is empty, it won't be counted."
+  (declare (side-effect-free t))
   (count-lines (point-min) (point-max)))
 
 (defun statusbar--buffer-file-like-p ()
   "Is the buffer visiting something that should be a file?"
+  (declare (side-effect-free t))
   (or buffer-file-name
       (derived-mode-p 'prog-mode 'text-mode)))
 
 (defun statusbar--buffer-file-path ()
   "The file path if the current buffer is a file, otherwise nil."
   (declare (side-effect-free t))
-  (and buffer-file-truename (abbreviate-file-name buffer-file-truename)))
+  (and buffer-file-truename
+       (abbreviate-file-name buffer-file-truename)))
 
 (defun statusbar-buffer-name ()
   "The name of the buffer. If it's a file, show the directory on hover and open dired with a click."
+  (declare (side-effect-free t))
   (if buffer-file-truename
       (propertize
        (buffer-name)
@@ -103,12 +107,14 @@ Possible values: :bottom :top")
 
 (defun statusbar-primary-file-or-buffer-name ()
   "The name of the file or buffer in the primary pane."
-  (let ((b (window-buffer primary-pane)))
-    (or (statusbar--buffer-file-path b)
-        (buffer-name b))))
+  (declare (side-effect-free t))
+  (with-current-buffer (window-buffer primary-pane)
+    (or (statusbar--buffer-file-path)
+        (buffer-name))))
 
 (defun statusbar-major-mode-name ()
   "The buffer's major-mode"
+  (declare (side-effect-free t))
   (propertize
    mode-name
    'help-echo "Click mouse 1 for mode menu, mouse 2 for mode info, or mouse 3 to toggle minor modes."
@@ -116,12 +122,14 @@ Possible values: :bottom :top")
 
 (defun statusbar-major-prog-mode-name ()
   "The buffer's major mode, if it's derived from prog-mode."
+  (declare (side-effect-free t))
   (if (derived-mode-p 'prog-mode)
       (statusbar-major-mode-name)
     ""))
 
 (defun statusbar-buffer-write-status-string ()
   "Show whether a file-like buffer has been modified since its last save; click to save."
+  (declare (side-effect-free t))
   (if (not (statusbar--buffer-file-like-p))
       "" ; Ignore buffers that aren't files.
     (propertize
@@ -136,6 +144,7 @@ Possible values: :bottom :top")
 
 
 (defun statusbar-vc-branch-string ()
+  (declare (side-effect-free t))
   (if (not vc-mode)
       ""
     (concat
@@ -148,6 +157,7 @@ Possible values: :bottom :top")
 
 (defun statusbar-line-position-string ()
   "Current line / total lines. Click to toggle line numbers."
+  (declare (side-effect-free t))
   (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
      (concat
@@ -161,6 +171,7 @@ Possible values: :bottom :top")
 
 (defun statusbar-line-position-string-padded ()
   "Current line / total lines. Click to toggle line numbers."
+  (declare (side-effect-free t))
   (let ((lines (number-to-string (statusbar--buffer-line-count))))
     (propertize
      (concat
@@ -175,10 +186,14 @@ Possible values: :bottom :top")
 (if (fboundp 'winum-get-number-string)
     (defun statusbar-pane-number-string ()
       "The window's number if we can get it."
+      (declare (side-effect-free t))
       (when (cdr (window-list nil 0))
         (propertize (winum-get-number-string)
                     'face (statusbar-emphasized-active))))
-  (defun statusbar-pane-number-string () "Empty string" ""))
+  (defun statusbar-pane-number-string ()
+    "Empty string"
+    (declare (pure t) (side-effect-free t))
+    ""))
 
 
 ;;; Utility procedures
@@ -187,6 +202,7 @@ Possible values: :bottom :top")
   "If WIDTH is greater than the width of STRING, pad string with zeros on the right.
 If WIDTH is less than the width of STRING, truncate STRING with an ellipsis.
 Otherwise return STRING."
+  (declare (pure t) (side-effect-free t))
   (let ((initial-width (string-width STRING)))
     (cond ((= WIDTH initial-width)
            STRING)
@@ -196,6 +212,7 @@ Otherwise return STRING."
           (t (misc--pad (- WIDTH) STRING)))))
 
 (defun statusbar--concat-when-first (&rest STRINGS)
+  (declare (pure t) (side-effect-free t))
   (when STRINGS
     (if (or (null (car STRINGS))
             (string= "" (car STRINGS)))
@@ -206,6 +223,8 @@ Otherwise return STRING."
 ;;; Layouts
 
 (defun statusbar (LEFT &optional RIGHT)
+  "Format a string to show as the statusbar."
+  (declare (pure t) (side-effect-free t))
   (let* ((left-string (format-mode-line LEFT))
          (right-string (format-mode-line RIGHT))
          (full-string (concat
